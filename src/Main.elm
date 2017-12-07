@@ -57,6 +57,7 @@ type Styles
     | ShadowedWhite
     | ShadowedDark
     | ShadowedPurple
+    | PurpleUnderline
     | ActionList
     | AsSeenIn
     | About
@@ -114,6 +115,7 @@ stylesheet =
             ]
         , style ShadowedDark
             [ Color.text dark
+            , Color.decoration purple
             , Font.size (fontScale 2)
             , Font.weight 700
             , Shadow.text { offset = ( 1, 3 ), blur = 0, color = white }
@@ -123,6 +125,10 @@ stylesheet =
             , Font.size (fontScale 2)
             , Font.weight 700
             , Shadow.text { offset = ( 1, 3 ), blur = 0, color = white }
+            ]
+        , style PurpleUnderline
+            [ Font.underline
+            , Color.decoration purple
             ]
         , style ActionList
             [ Color.text teal
@@ -262,15 +268,48 @@ about =
                 [ padding 20 ]
                 [ paragraph NoStyle
                     []
-                    [ text "Raised and taught in the Pacific Northwest, I am on a mission to make your product into reality."
+                    [ text "As a regular podcast binger, I am on a mission to make your product a reality."
                     ]
                 , paragraph NoStyle
                     [ paddingTop 20 ]
                     [ text "I am an enthusiastic engineer seeking to pin my curiosity and creativity against challenging problems."
+                    , text " I know that any obstacle can be overcome with the ingenuity of an open-minded team."
                     ]
                 , paragraph NoStyle
                     [ paddingTop 20 ]
-                    [ text "I know that any obstacle can be overcome with the ingenuity of an open-minded team."
+                    [ text "My college curriculum taught me "
+                    , el PurpleUnderline [] (text "C and unix systems programming")
+                    , text ". But in my free time I learned "
+                    , el PurpleUnderline [] (text "web development")
+                    , text " and "
+                    , el PurpleUnderline [] (text "Node.js")
+                    , text ", which landed me a finance SaaS internship involving "
+                    , el PurpleUnderline [] (text "REST")
+                    , text " and "
+                    , el PurpleUnderline [] (text "SQL")
+                    , text "."
+                    ]
+                , paragraph NoStyle
+                    [ paddingTop 20 ]
+                    [ text "After graduation I leveraged my systems knowledge as a core engineer at an autonomous vehicle startup."
+                    , text " While there I used "
+                    , el PurpleUnderline [] (text "Unix/POSIX")
+                    , text " to make efficient and reliable automotive sensor drivers and log files."
+                    , text " I also used  "
+                    , el PurpleUnderline [] (text "SQLite")
+                    , text " to manage the vehicle's distributed configuration."
+                    ]
+                , paragraph NoStyle
+                    [ paddingTop 20 ]
+                    [ text "Outside of the office I continued to study new relevant or intriguing material."
+                    , text " As a guard rail against systems programming traps, "
+                    , el PurpleUnderline [] (text "Rust")
+                    , text " grabbed my attention and never let go."
+                    , text " A helpful compiler and safety guarantees also pushed me towards learning "
+                    , el PurpleUnderline [] (text "Haskell")
+                    , text " and "
+                    , el PurpleUnderline [] (text "Elm")
+                    , text ", which I used to make this page!"
                     ]
                 , paragraph NoStyle
                     [ paddingTop 20 ]
@@ -281,13 +320,4 @@ about =
                     [ link mailto <| (text email) ]
                 ]
             ]
-        ]
-
-
-q_and_a : String -> String -> Element.Element Styles variation Msg
-q_and_a question answer =
-    paragraph Qualifier
-        []
-        [ el Question [ padding 15 ] (text question)
-        , el Answer [] (text answer)
         ]
