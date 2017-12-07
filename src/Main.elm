@@ -1,10 +1,11 @@
 module Main exposing (main)
 
 import Html
+import Dict
 import Color exposing (..)
 import Style exposing (style)
 import Element exposing (textLayout, layout, row, column, text, underline, link, el, paragraph, image)
-import Element.Attributes exposing (spacing, padding, paddingBottom, paddingTop, center, verticalCenter, height, width, maxWidth, px, fill)
+import Element.Attributes exposing (spacing, padding, paddingBottom, paddingTop, center, verticalCenter, height, width, maxWidth, px, fill, percent)
 import Style.Scale
 import Style.Color as Color
 import Style.Font as Font
@@ -53,13 +54,30 @@ type Styles
     | Title
     | ContestBanner
     | ActionCall
-    | ActionTagline
+    | ShadowedWhite
+    | ShadowedDark
+    | ShadowedPurple
     | ActionList
     | AsSeenIn
-    | Qualifications
+    | About
     | Qualifier
     | Question
     | Answer
+
+
+purple : Color.Color
+purple =
+    Color.rgb 78 64 169
+
+
+teal : Color.Color
+teal =
+    Color.rgb 46 255 217
+
+
+dark : Color.Color
+dark =
+    Color.rgb 41 47 54
 
 
 stylesheet : Style.StyleSheet Styles variation
@@ -72,30 +90,42 @@ stylesheet =
         , style Page
             [ Font.typeface (fontStack SansSerif) ]
         , style Header
-            [ Color.background (Color.rgb 78 64 169)
+            [ Color.background purple
             , Color.text white
             ]
         , style ContestBanner
-            [ Color.background (Color.rgb 46 255 217)
-            , Color.text (Color.rgb 41 47 54)
+            [ Color.background teal
+            , Color.text dark
             , Font.uppercase
             , Font.size (fontScale 1)
             , Font.weight 700
-            , Shadow.box { offset = ( 0, 2 ), size = 2, blur = 0, color = Color.rgba 41 47 54 0.24 }
+            , Shadow.box { offset = ( 0, 2 ), size = 2, blur = 0, color = Color.rgba 41 47 54 0.2 }
             ]
         , style Title
             [ Font.size (fontScale 3)
             ]
         , style ActionCall
             [ Background.gradient (pi * 3 / 4) [ Background.step (Color.rgb 71 161 255), Background.step (Color.rgb 99 120 253) ] ]
-        , style ActionTagline
+        , style ShadowedWhite
             [ Color.text white
             , Font.size (fontScale 3)
             , Font.weight 700
             , Shadow.text { offset = ( 0, 2 ), blur = 0, color = Color.rgba 0 0 0 0.2 }
             ]
+        , style ShadowedDark
+            [ Color.text dark
+            , Font.size (fontScale 2)
+            , Font.weight 700
+            , Shadow.text { offset = ( 1, 3 ), blur = 0, color = white }
+            ]
+        , style ShadowedPurple
+            [ Color.text purple
+            , Font.size (fontScale 2)
+            , Font.weight 700
+            , Shadow.text { offset = ( 1, 3 ), blur = 0, color = white }
+            ]
         , style ActionList
-            [ Color.text (Color.rgb 46 255 217)
+            [ Color.text teal
             , Font.size (fontScale 2)
             , Font.weight 700
             ]
@@ -104,7 +134,9 @@ stylesheet =
             , Font.size (fontScale 2)
             , Color.text (Color.rgb 78 72 72)
             ]
-        , style Qualifications []
+        , style About
+            [ Color.background teal
+            ]
         , style Qualifier []
         , style Question
             [ Font.bold ]
@@ -138,18 +170,23 @@ fontStack stack =
 
 email : String
 email =
-    "mailto:crockagile@gmail.com"
+    "crockagile@gmail.com"
+
+
+mailto : String
+mailto =
+    "mailto:" ++ email
 
 
 view : Model -> Html.Html Msg
 view model =
     Element.layout stylesheet <|
         column Page
-            [ center, width fill ]
+            [ center, width fill, height fill ]
             [ header
             , actionCall
             , asSeenIn
-            , qualifications
+            , about
             ]
 
 
@@ -168,7 +205,7 @@ contestBanner : Element.Element Styles variation Msg
 contestBanner =
     el ContestBanner
         [ width fill, center ]
-        (link email <|
+        (link mailto <|
             (el NoStyle [ padding 6, center ] (text "Hire Jeff Crocker.  Find out how💰"))
         )
 
@@ -178,12 +215,12 @@ actionCall =
     column ActionCall
         [ width fill, center, spacing 40, paddingBottom 60 ]
         [ contestBanner
-        , Element.h2 ActionTagline [] (text "Writes code, right from your office.")
+        , Element.h2 ShadowedWhite [] (text "Writes code, right from your office.")
         , Element.h3 ActionList [] (text "Get products, cooperation, and passion, all for one salary.")
         , Element.paragraph ActionList
             []
             [ el NoStyle [ padding 6 ] (text "Already have engineers?")
-            , link email <| (underline "Great, I work better in teams.")
+            , link mailto <| (underline "Great, I work better in teams.")
             ]
         ]
 
@@ -191,7 +228,7 @@ actionCall =
 asSeenIn : Element.Element Styles variation Msg
 asSeenIn =
     column AsSeenIn
-        [ spacing 20, center, paddingTop 25 ]
+        [ spacing 20, center, paddingTop 25, paddingBottom 25 ]
         [ Element.h4 NoStyle
             []
             (text "As seen in...")
@@ -200,21 +237,50 @@ asSeenIn =
             [ width fill, spacing 40 ]
             (List.map
                 asSeenInLogo
-                [ ( "polysync.png", "PolySync" ), ( "souperseconds.png", "Souper Seconds" ), ( "clearwater.png", "Clearwater Analytics" ) ]
+                [ ( "polysync.png", "PolySync" )
+                , ( "souperseconds.png", "Souper Seconds" )
+                , ( "clearwater.png", "Clearwater Analytics" )
+                , ( "camporkila.jpg", "Camp Orkila" )
+                ]
             )
         ]
 
 
 asSeenInLogo : ( String, String ) -> Element.Element Styles variation Msg
 asSeenInLogo ( src, company ) =
-    image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Company Logo" }
+    image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Logo" }
 
 
-qualifications : Element.Element Styles variation Msg
-qualifications =
-    Element.textLayout Qualifications
-        [ width fill, height fill ]
-        [ (q_and_a "Qualified?" "Does it reload?")
+about : Element.Element Styles variation Msg
+about =
+    row About
+        [ width fill, center, padding 30 ]
+        [ column NoStyle
+            [ maxWidth (px 780), width fill ]
+            [ Element.h2 ShadowedWhite [ padding 30 ] (text "About me")
+            , textLayout ShadowedDark
+                [ padding 20 ]
+                [ paragraph NoStyle
+                    []
+                    [ text "Raised and taught in the Pacific Northwest, I am on a mission to make your product into reality."
+                    ]
+                , paragraph NoStyle
+                    [ paddingTop 20 ]
+                    [ text "I am an enthusiastic engineer seeking to pin my curiosity and creativity against challenging problems."
+                    ]
+                , paragraph NoStyle
+                    [ paddingTop 20 ]
+                    [ text "I know that any obstacle can be overcome with the ingenuity of an open-minded team."
+                    ]
+                , paragraph NoStyle
+                    [ paddingTop 20 ]
+                    [ text "Want to work together? Email"
+                    ]
+                , paragraph ShadowedPurple
+                    []
+                    [ link mailto <| (text email) ]
+                ]
+            ]
         ]
 
 
