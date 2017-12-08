@@ -123,6 +123,7 @@ type Styles
     | Challenge
     | ChallengeInput
     | ChallengeInputLimit
+    | SolutionChar
 
 
 purple : Color.Color
@@ -212,10 +213,10 @@ stylesheet =
             , Border.all 5
             , Style.focus [ Color.border teal ]
             ]
-        , style ChallengeInputLimit
+        , style SolutionChar
             [ Color.border black
             , Border.all 2
-            , Style.focus [ Color.border teal ]
+            , Font.typeface (fontStack Mono)
             ]
         ]
 
@@ -431,24 +432,50 @@ challenge model =
 
 solution : Model -> Element.Element Styles Cmd Msg
 solution model =
-    (text "TODO")
+    let
+        challengeTextCounts =
+            countCharacters model.challengeText
+    in
+        Element.column NoStyle
+            []
+            [ solutionChars challengeTextCounts
+            ]
+
+
+solutionChars : Dict.Dict Char Int -> Element.Element Styles Cmd Msg
+solutionChars countDict =
+    let
+        counts =
+            Dict.toList countDict |> List.sortBy (Tuple.second)
+    in
+        Element.wrappedRow NoStyle
+            [ spacing 5 ]
+            (List.map
+                solutionChar
+                counts
+            )
+
+
+solutionChar : ( Char, Int ) -> Element.Element Styles Cmd Msg
+solutionChar ( char, count ) =
+    el SolutionChar [] (text (toString char ++ "|" ++ (String.padLeft 3 ' ' (toString count))))
 
 
 countCharacters : String -> Dict.Dict Char Int
 countCharacters string =
     let
-        incrementChar : Maybe Int -> Maybe Int
-        incrementChar maybeCount =
+        incrementChar : Int -> Maybe Int -> Maybe Int
+        incrementChar inc maybeCount =
             case maybeCount of
                 Just n ->
-                    Just (n + 1)
+                    Just (n + inc)
 
                 Nothing ->
                     Just 1
 
         updateCounts : Char -> Dict.Dict Char Int -> Dict.Dict Char Int
         updateCounts char counts =
-            Dict.update char incrementChar counts
+            Dict.update char (incrementChar 1) counts
     in
         string
             |> String.foldl updateCounts Dict.empty
