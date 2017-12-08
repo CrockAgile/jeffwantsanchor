@@ -464,7 +464,7 @@ solution model =
             String.length model.challengeText - model.challengeLimit
 
         solution =
-            Knapsack.solve_01 charCounts (\_ -> 1) (Tuple.second) extraLength
+            Knapsack.solve_01 charCounts (always 1) (Tuple.second) extraLength
                 |> Maybe.withDefault []
 
         usedChars =
