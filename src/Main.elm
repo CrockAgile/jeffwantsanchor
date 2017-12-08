@@ -1,16 +1,47 @@
-module Main exposing (main)
+module Main exposing (main, countCharacters)
 
-import Html
+import Knapsack
 import Dict
+import Html
 import Color exposing (..)
 import Style exposing (style)
-import Element exposing (textLayout, layout, row, column, text, underline, link, el, paragraph, image)
-import Element.Attributes exposing (spacing, padding, paddingBottom, paddingTop, center, verticalCenter, height, width, maxWidth, px, fill, percent)
-import Style.Scale
+import Element.Input as Input
+import Style.Scale as Scale
+import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Style.Background as Background
 import Style.Shadow as Shadow
+import Element
+    exposing
+        ( textLayout
+        , layout
+        , row
+        , column
+        , text
+        , underline
+        , link
+        , el
+        , paragraph
+        , image
+        )
+import Element.Attributes
+    exposing
+        ( spacing
+        , padding
+        , paddingBottom
+        , paddingTop
+        , center
+        , verticalCenter
+        , height
+        , width
+        , maxWidth
+        , px
+        , fill
+        , percent
+        , spread
+        , verticalSpread
+        )
 
 
 main : Program Never Model Msg
@@ -24,21 +55,49 @@ main =
 
 
 type alias Model =
-    Int
+    { challengeText : String
+    , challengeLimit : Int
+    }
+
+
+initChallengeText : String
+initChallengeText =
+    "If you want to jumpstart the process of talking to us about this role, here’s a little challenge: write a program that outputs the largest unique set of characters that can be removed from this paragraph without letting its length drop below 50."
+
+
+initChallengeLimit : Int
+initChallengeLimit =
+    50
 
 
 init : ( Model, Cmd msg )
 init =
-    ( 0, Cmd.none )
+    ( { challengeText = initChallengeText, challengeLimit = initChallengeLimit }, Cmd.none )
 
 
 type Msg
-    = Nothing
+    = NewChallengeText String
+    | NewChallengeLimit String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        NewChallengeText challengeText ->
+            ( { model | challengeText = challengeText }, Cmd.none )
+
+        NewChallengeLimit limitString ->
+            updateChallengeLength limitString model
+
+
+updateChallengeLength : String -> Model -> ( Model, Cmd Msg )
+updateChallengeLength limitString model =
+    case String.toInt limitString of
+        Ok challengeLimit ->
+            ( { model | challengeLimit = challengeLimit }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -61,9 +120,9 @@ type Styles
     | ActionList
     | AsSeenIn
     | About
-    | Qualifier
-    | Question
-    | Answer
+    | Challenge
+    | ChallengeInput
+    | ChallengeInputLimit
 
 
 purple : Color.Color
@@ -81,7 +140,7 @@ dark =
     Color.rgb 41 47 54
 
 
-stylesheet : Style.StyleSheet Styles variation
+stylesheet : Style.StyleSheet Styles Cmd
 stylesheet =
     Style.styleSheet
         [ style NoStyle []
@@ -143,16 +202,27 @@ stylesheet =
         , style About
             [ Color.background teal
             ]
-        , style Qualifier []
-        , style Question
-            [ Font.bold ]
-        , style Answer []
+        , style Challenge
+            [ Font.size (fontScale 2)
+            , Font.weight 700
+            ]
+        , style ChallengeInput
+            [ Font.size (fontScale 1)
+            , Color.border purple
+            , Border.all 5
+            , Style.focus [ Color.border teal ]
+            ]
+        , style ChallengeInputLimit
+            [ Color.border black
+            , Border.all 2
+            , Style.focus [ Color.border teal ]
+            ]
         ]
 
 
 fontScale : Int -> Float
 fontScale =
-    Style.Scale.roundedModular 18 1.618
+    Scale.roundedModular 18 1.618
 
 
 type FontStack
@@ -193,10 +263,11 @@ view model =
             , actionCall
             , asSeenIn
             , about
+            , challenge model
             ]
 
 
-header : Element.Element Styles variation Msg
+header : Element.Element Styles Cmd Msg
 header =
     Element.header Header
         []
@@ -207,7 +278,7 @@ header =
         )
 
 
-contestBanner : Element.Element Styles variation Msg
+contestBanner : Element.Element Styles Cmd Msg
 contestBanner =
     el ContestBanner
         [ width fill, center ]
@@ -216,7 +287,7 @@ contestBanner =
         )
 
 
-actionCall : Element.Element Styles variation Msg
+actionCall : Element.Element Styles Cmd Msg
 actionCall =
     column ActionCall
         [ width fill, center, spacing 40, paddingBottom 60 ]
@@ -231,7 +302,7 @@ actionCall =
         ]
 
 
-asSeenIn : Element.Element Styles variation Msg
+asSeenIn : Element.Element Styles Cmd Msg
 asSeenIn =
     column AsSeenIn
         [ spacing 20, center, paddingTop 25, paddingBottom 25 ]
@@ -252,18 +323,18 @@ asSeenIn =
         ]
 
 
-asSeenInLogo : ( String, String ) -> Element.Element Styles variation Msg
+asSeenInLogo : ( String, String ) -> Element.Element Styles Cmd Msg
 asSeenInLogo ( src, company ) =
     image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Logo" }
 
 
-about : Element.Element Styles variation Msg
+about : Element.Element Styles Cmd Msg
 about =
     row About
         [ width fill, center, padding 30 ]
         [ column NoStyle
             [ maxWidth (px 780), width fill ]
-            [ Element.h2 ShadowedWhite [ padding 30 ] (text "About me")
+            [ Element.h2 ShadowedWhite [ padding 20 ] (text "About me")
             , textLayout ShadowedDark
                 [ padding 20 ]
                 [ paragraph NoStyle
@@ -302,7 +373,7 @@ about =
                 , paragraph NoStyle
                     [ paddingTop 20 ]
                     [ text "Outside of the office I continued to study new relevant or intriguing material."
-                    , text " As a guard rail against systems programming traps, "
+                    , text " As a protection from system programming traps, "
                     , el PurpleUnderline [] (text "Rust")
                     , text " grabbed my attention and never let go."
                     , text " A helpful compiler and safety guarantees also pushed me towards learning "
@@ -321,3 +392,63 @@ about =
                 ]
             ]
         ]
+
+
+challenge : Model -> Element.Element Styles Cmd Msg
+challenge model =
+    column Challenge
+        [ width fill, maxWidth (px 780), center, padding 30, spacing 20 ]
+        [ row NoStyle
+            [ width fill, spread, spacing 10 ]
+            [ Input.text ChallengeInputLimit
+                []
+                { onChange = NewChallengeLimit
+                , value = toString initChallengeLimit
+                , label = Input.labelAbove (text "Minimum Length")
+                , options = []
+                }
+            , column NoStyle
+                [ verticalSpread ]
+                [ (text "Extra length")
+                , (text (toString ((String.length model.challengeText) - model.challengeLimit)))
+                ]
+            ]
+        , Input.multiline ChallengeInput
+            [ height (px 300), padding 10 ]
+            { onChange = NewChallengeText
+            , value = initChallengeText
+            , label =
+                (Input.placeholder
+                    { text = "Challenge Input Text"
+                    , label = Input.hiddenLabel "Input:"
+                    }
+                )
+            , options = []
+            }
+        , solution model
+        ]
+
+
+solution : Model -> Element.Element Styles Cmd Msg
+solution model =
+    (text "TODO")
+
+
+countCharacters : String -> Dict.Dict Char Int
+countCharacters string =
+    let
+        incrementChar : Maybe Int -> Maybe Int
+        incrementChar maybeCount =
+            case maybeCount of
+                Just n ->
+                    Just (n + 1)
+
+                Nothing ->
+                    Just 1
+
+        updateCounts : Char -> Dict.Dict Char Int -> Dict.Dict Char Int
+        updateCounts char counts =
+            Dict.update char incrementChar counts
+    in
+        string
+            |> String.foldl updateCounts Dict.empty
