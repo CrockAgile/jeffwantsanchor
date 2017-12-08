@@ -20,6 +20,7 @@ import Element
         , textLayout
         , layout
         , row
+        , wrappedRow
         , column
         , grid
         , cell
@@ -34,7 +35,8 @@ import Element
         , h2
         , h3
         , h4
-        , wrappedRow
+        , navigation
+        , spacer
         )
 import Element.Attributes
     exposing
@@ -42,6 +44,9 @@ import Element.Attributes
         , padding
         , paddingBottom
         , paddingTop
+        , paddingRight
+        , paddingLeft
+        , paddingXY
         , center
         , verticalCenter
         , height
@@ -52,6 +57,7 @@ import Element.Attributes
         , percent
         , spread
         , verticalSpread
+        , id
         )
 
 
@@ -135,6 +141,8 @@ type Styles
     | Page
     | Header
     | Title
+    | Nav
+    | NavLink
     | ContestBanner
     | ActionCall
     | ShadowedWhite
@@ -192,6 +200,13 @@ stylesheet =
         , style Title
             [ Font.size (fontScale 3)
             ]
+        , style Nav
+            [ Color.text teal
+            , Font.uppercase
+            , Font.weight 700
+            ]
+        , style NavLink
+            []
         , style ActionCall
             [ Background.gradient (pi * 3 / 4) [ Background.step (Color.rgb 71 161 255), Background.step (Color.rgb 99 120 253) ] ]
         , style ShadowedWhite
@@ -324,8 +339,23 @@ header =
     Element.header Header
         []
         (row NoStyle
-            [ center, verticalCenter, width fill, height (px 85) ]
+            [ center, verticalCenter, width fill, height (px 85), spacing 20 ]
             [ Element.h1 Title [] (text "Jeff Wants Anchor")
+            , spacer 7
+            , navigation Nav
+                [ spacing 30 ]
+                { name = "Main Navigation"
+                , options =
+                    [ link "#about" <| el NavLink [] (text "about")
+                    , link "#challenge" <| el NavLink [] (text "challenge")
+                    , link "/jeffcrocker_anchor_resume.pdf" <| el NavLink [] (text "resume")
+                    , link "https://github.com/CrockAgile/jeffwantsanchor" <|
+                        el
+                            NavLink
+                            []
+                            (text "github")
+                    ]
+                }
             ]
         )
 
@@ -349,7 +379,7 @@ actionCall =
         , paragraph ActionList
             []
             [ el NoStyle [ padding 6 ] (text "Already have engineers?")
-            , link mailto <| (underline "Great, I work better in teams.")
+            , link mailto <| underline "Great, I work better in teams."
             ]
         ]
 
@@ -357,7 +387,7 @@ actionCall =
 asSeenIn : Element.Element Styles Cmd Msg
 asSeenIn =
     column AsSeenIn
-        [ spacing 20, center, paddingTop 25, paddingBottom 25 ]
+        [ spacing 20, center, paddingTop 25, paddingBottom 65 ]
         [ h4 NoStyle
             []
             (text "As seen in...")
@@ -386,7 +416,7 @@ about =
         [ width fill, center, padding 30 ]
         [ column NoStyle
             [ maxWidth (px 780), width fill ]
-            [ h2 ShadowedWhite [ padding 20 ] (text "About me")
+            [ h2 ShadowedWhite [ padding 20, id "about" ] (text "About me")
             , textLayout ShadowedDark
                 [ padding 20 ]
                 [ paragraph NoStyle
@@ -440,7 +470,7 @@ about =
                     ]
                 , paragraph ShadowedPurple
                     []
-                    [ link mailto <| (text email) ]
+                    [ link mailto <| text email ]
                 ]
             ]
         ]
@@ -450,7 +480,8 @@ challenge : Model -> Element Styles Cmd Msg
 challenge model =
     column Challenge
         [ width fill, maxWidth (px 780), center, padding 30, spacing 20 ]
-        [ grid NoStyle
+        [ h2 ShadowedPurple [ padding 20, id "challenge" ] (text "Challenge")
+        , grid NoStyle
             [ width fill, spacing 10 ]
             { columns = [ fill, fill, fill ]
             , rows = [ fill, fill ]
@@ -609,7 +640,7 @@ solution model =
                             )
                             model.challengeText
                     ]
-                , el ActionList
+                , el ShadowedPurple
                     [ padding 20, center ]
                     (link
                         mailto
