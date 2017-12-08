@@ -20,6 +20,8 @@ import Element
         , layout
         , row
         , column
+        , grid
+        , cell
         , text
         , underline
         , link
@@ -441,26 +443,77 @@ challenge : Model -> Element.Element Styles Cmd Msg
 challenge model =
     column Challenge
         [ width fill, maxWidth (px 780), center, padding 30, spacing 20 ]
-        [ row NoStyle
-            [ width fill, spread, spacing 10 ]
-            [ Input.text ChallengeInputLimit
-                []
-                { onChange = NewChallengeLimit
-                , value = toString initChallengeLimit
-                , label = Input.hiddenLabel "Minimum Length"
-                , options = [ Input.allowSpellcheck ]
-                }
-            , column NoStyle
-                [ width fill, verticalSpread ]
-                [ text "Mode"
-                , modeButton model.challengeMode
+        [ grid NoStyle
+            [ width fill, spacing 10 ]
+            { columns = [ fill, fill, fill ]
+            , rows = [ fill, fill ]
+            , cells =
+                [ cell
+                    { start = ( 0, 0 )
+                    , width = 1
+                    , height = 1
+                    , content = text "Min Length"
+                    }
+                , cell
+                    { start = ( 0, 1 )
+                    , width = 1
+                    , height = 1
+                    , content =
+                        Input.text ChallengeInputLimit
+                            []
+                            { onChange = NewChallengeLimit
+                            , value = toString initChallengeLimit
+                            , label = Input.hiddenLabel "Minimum Length"
+                            , options = [ Input.allowSpellcheck ]
+                            }
+                    }
+                , cell
+                    { start = ( 1, 0 )
+                    , width = 1
+                    , height = 1
+                    , content = text "Mode"
+                    }
+                , cell
+                    { start = ( 1, 1 )
+                    , width = 1
+                    , height = 1
+                    , content = modeButton model.challengeMode
+                    }
+                , cell
+                    { start = ( 2, 0 )
+                    , width = 1
+                    , height = 1
+                    , content = text "Current Length"
+                    }
+                , cell
+                    { start = ( 2, 1 )
+                    , width = 1
+                    , height = 1
+                    , content = text <| toString <| String.length model.challengeText
+                    }
                 ]
-            , column NoStyle
-                [ width fill, verticalSpread ]
-                [ text "Current Length"
-                , text <| toString <| String.length model.challengeText
-                ]
-            ]
+            }
+
+        -- row NoStyle
+        -- [ width fill, spread, spacing 10 ]
+        -- [ Input.text ChallengeInputLimit
+        --     []
+        --     { onChange = NewChallengeLimit
+        --     , value = toString initChallengeLimit
+        --     , label = Input.hiddenLabel "Minimum Length"
+        --     , options = [ Input.allowSpellcheck ]
+        --     }
+        -- , column NoStyle
+        --     [ width fill, verticalSpread ]
+        --     [ text "Mode"
+        --     , modeButton model.challengeMode
+        --     ]
+        -- , column NoStyle
+        --     [ width fill, verticalSpread ]
+        --     [ text "Current Length"
+        --     , text <| toString <| String.length model.challengeText
+        --     ]
+        -- ]
         , Input.multiline ChallengeInput
             [ height (px 300), padding 10 ]
             { onChange = NewChallengeText
