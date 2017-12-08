@@ -61,8 +61,8 @@ rosettaSolution =
 
 knapsack : Test
 knapsack =
-    describe "Knapsack solution"
-        [ test "Known solution" <|
+    describe "Knapsack"
+        [ test "known solution" <|
             \() ->
                 Expect.equal
                     (Knapsack.solve_01 rosettaItems (.value) (.weight) 400)

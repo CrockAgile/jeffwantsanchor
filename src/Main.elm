@@ -2,6 +2,7 @@ module Main exposing (main, countCharacters)
 
 import Knapsack
 import Dict
+import Set
 import Html
 import Color exposing (..)
 import Style exposing (style)
@@ -94,7 +95,14 @@ updateChallengeLength : String -> Model -> ( Model, Cmd Msg )
 updateChallengeLength limitString model =
     case String.toInt limitString of
         Ok challengeLimit ->
-            ( { model | challengeLimit = challengeLimit }, Cmd.none )
+            let
+                newLimit =
+                    if challengeLimit > 0 then
+                        challengeLimit
+                    else
+                        0
+            in
+                ( { model | challengeLimit = challengeLimit }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -123,7 +131,8 @@ type Styles
     | Challenge
     | ChallengeInput
     | ChallengeInputLimit
-    | SolutionChar
+    | SolutionCharBox
+    | SolutionCharBoxUsed
 
 
 purple : Color.Color
@@ -207,14 +216,24 @@ stylesheet =
             [ Font.size (fontScale 2)
             , Font.weight 700
             ]
+        , style ChallengeInputLimit
+            [ Color.border black
+            , Border.all 2
+            , Style.focus [ Color.border teal ]
+            ]
         , style ChallengeInput
             [ Font.size (fontScale 1)
             , Color.border purple
             , Border.all 5
             , Style.focus [ Color.border teal ]
             ]
-        , style SolutionChar
+        , style SolutionCharBox
             [ Color.border black
+            , Border.all 2
+            , Font.typeface (fontStack Mono)
+            ]
+        , style SolutionCharBoxUsed
+            [ Color.border teal
             , Border.all 2
             , Font.typeface (fontStack Mono)
             ]
@@ -411,7 +430,7 @@ challenge model =
             , column NoStyle
                 [ verticalSpread ]
                 [ (text "Extra length")
-                , (text (toString ((String.length model.challengeText) - model.challengeLimit)))
+                , (text (toString (String.length model.challengeText - model.challengeLimit)))
                 ]
             ]
         , Input.multiline ChallengeInput
@@ -433,32 +452,79 @@ challenge model =
 solution : Model -> Element.Element Styles Cmd Msg
 solution model =
     let
-        challengeTextCounts =
+        challengeTextDict =
             countCharacters model.challengeText
+
+        charCounts =
+            challengeTextDict
+                |> Dict.toList
+                |> List.sortBy Tuple.second
+
+        extraLength =
+            String.length model.challengeText - model.challengeLimit
+
+        solution =
+            Knapsack.solve_01 charCounts (\_ -> 1) (Tuple.second) extraLength
+                |> Maybe.withDefault []
+
+        usedChars =
+            solution
+                |> List.map Tuple.first
+                |> Set.fromList
+
+        solutionCost =
+            List.map Tuple.second solution
+                |> List.sum
+
+        charCountsUsed =
+            charCounts
+                |> List.map (\( char, count ) -> ( char, count, Set.member char usedChars ))
     in
         Element.column NoStyle
-            []
-            [ solutionChars challengeTextCounts
+            [ width fill, spacing 20 ]
+            [ solutionChars charCountsUsed
+            , column NoStyle
+                [ verticalSpread ]
+                [ (text "Removed Length")
+                , (text (toString solutionCost))
+                , (text "After Removal")
+                , (paragraph ChallengeInput
+                    [ height (px 300), padding 10 ]
+                    [ text <|
+                        String.filter
+                            (\char ->
+                                not <|
+                                    Set.member char usedChars
+                            )
+                            model.challengeText
+                    ]
+                  )
+                ]
             ]
 
 
-solutionChars : Dict.Dict Char Int -> Element.Element Styles Cmd Msg
-solutionChars countDict =
-    let
-        counts =
-            Dict.toList countDict |> List.sortBy (Tuple.second)
-    in
-        Element.wrappedRow NoStyle
-            [ spacing 5 ]
-            (List.map
-                solutionChar
-                counts
-            )
+solutionChars : List ( Char, Int, Bool ) -> Element.Element Styles Cmd Msg
+solutionChars counts =
+    Element.wrappedRow NoStyle
+        [ spacing 5, spread ]
+        (List.map
+            solutionCharBox
+            counts
+        )
 
 
-solutionChar : ( Char, Int ) -> Element.Element Styles Cmd Msg
-solutionChar ( char, count ) =
-    el SolutionChar [] (text (toString char ++ "|" ++ (String.padLeft 3 ' ' (toString count))))
+solutionCharBox : ( Char, Int, Bool ) -> Element.Element Styles Cmd Msg
+solutionCharBox ( char, count, used ) =
+    column
+        (if used then
+            SolutionCharBoxUsed
+         else
+            SolutionCharBox
+        )
+        [ center ]
+        [ text (toString char)
+        , text (toString count)
+        ]
 
 
 countCharacters : String -> Dict.Dict Char Int
