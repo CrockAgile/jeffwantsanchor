@@ -7,6 +7,7 @@ import Html
 import Color exposing (..)
 import Style exposing (style)
 import Element.Input as Input
+import Element.Events as Events
 import Style.Scale as Scale
 import Style.Border as Border
 import Style.Color as Color
@@ -55,9 +56,15 @@ main =
         }
 
 
+type ChallengeMode
+    = ValueCharOne
+    | ValueCharFrequency
+
+
 type alias Model =
     { challengeText : String
     , challengeLimit : Int
+    , challengeMode : ChallengeMode
     }
 
 
@@ -73,12 +80,18 @@ initChallengeLimit =
 
 init : ( Model, Cmd msg )
 init =
-    ( { challengeText = initChallengeText, challengeLimit = initChallengeLimit }, Cmd.none )
+    ( { challengeText = initChallengeText
+      , challengeLimit = initChallengeLimit
+      , challengeMode = ValueCharFrequency
+      }
+    , Cmd.none
+    )
 
 
 type Msg
     = NewChallengeText String
     | NewChallengeLimit String
+    | NewChallengeMode ChallengeMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -86,6 +99,9 @@ update msg model =
     case msg of
         NewChallengeText challengeText ->
             ( { model | challengeText = challengeText }, Cmd.none )
+
+        NewChallengeMode challengeMode ->
+            ( { model | challengeMode = challengeMode }, Cmd.none )
 
         NewChallengeLimit limitString ->
             ( { model
@@ -124,6 +140,8 @@ type Styles
     | ChallengeInputLimit
     | SolutionCharBox
     | SolutionCharBoxUsed
+    | ValueCharOneButton
+    | ValueCharFrequencyButton
 
 
 purple : Color.Color
@@ -226,6 +244,20 @@ stylesheet =
         , style SolutionCharBoxUsed
             [ Color.border teal
             , Border.all 2
+            , Font.typeface (fontStack Mono)
+            ]
+        , style ValueCharOneButton
+            [ Color.border black
+            , Color.text teal
+            , Border.all 2
+            , Font.size (fontScale 1)
+            , Font.typeface (fontStack Mono)
+            ]
+        , style ValueCharFrequencyButton
+            [ Color.border black
+            , Color.text purple
+            , Border.all 2
+            , Font.size (fontScale 1)
             , Font.typeface (fontStack Mono)
             ]
         ]
@@ -415,13 +447,18 @@ challenge model =
                 []
                 { onChange = NewChallengeLimit
                 , value = toString initChallengeLimit
-                , label = Input.labelAbove (text "Minimum Length")
+                , label = Input.hiddenLabel "Minimum Length"
                 , options = [ Input.allowSpellcheck ]
                 }
             , column NoStyle
-                [ verticalSpread ]
-                [ (text "Current Length")
-                , (text <| toString <| String.length model.challengeText)
+                [ width fill, verticalSpread ]
+                [ text "Mode"
+                , modeButton model.challengeMode
+                ]
+            , column NoStyle
+                [ width fill, verticalSpread ]
+                [ text "Current Length"
+                , text <| toString <| String.length model.challengeText
                 ]
             ]
         , Input.multiline ChallengeInput
@@ -440,6 +477,42 @@ challenge model =
         ]
 
 
+modeButton : ChallengeMode -> Element.Element Styles Cmd Msg
+modeButton mode =
+    let
+        buttonStyle =
+            case mode of
+                ValueCharOne ->
+                    ValueCharOneButton
+
+                ValueCharFrequency ->
+                    ValueCharFrequencyButton
+
+        onClick =
+            NewChallengeMode
+                (case mode of
+                    ValueCharOne ->
+                        ValueCharFrequency
+
+                    ValueCharFrequency ->
+                        ValueCharOne
+                )
+
+        label =
+            case mode of
+                ValueCharOne ->
+                    "Value One"
+
+                ValueCharFrequency ->
+                    "Value Frequency"
+    in
+        Element.button buttonStyle
+            [ width fill
+            , Events.onClick onClick
+            ]
+            (text label)
+
+
 solution : Model -> Element.Element Styles Cmd Msg
 solution model =
     let
@@ -454,8 +527,16 @@ solution model =
         extraLength =
             String.length model.challengeText - model.challengeLimit
 
+        itemValue =
+            case model.challengeMode of
+                ValueCharOne ->
+                    always 1
+
+                ValueCharFrequency ->
+                    Tuple.second
+
         solution =
-            Knapsack.solve_01 charCounts (always 1) (Tuple.second) extraLength
+            Knapsack.solve_01 charCounts itemValue Tuple.second extraLength
                 |> Maybe.withDefault []
 
         usedChars =
