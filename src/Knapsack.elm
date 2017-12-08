@@ -38,7 +38,7 @@ solve_01 rawItems toValue toWeight limit =
                 left ++ List.map2 chooseOptimal right optimalList
 
         optimalWeights =
-            List.foldr addItem (List.repeat limit ( 0, [] )) mappedItems
+            List.foldr addItem (List.repeat (limit + 1) ( 0, [] )) mappedItems
     in
         optimalWeights
             |> List.foldl (Just >> always) Nothing
