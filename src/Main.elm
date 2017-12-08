@@ -16,7 +16,8 @@ import Style.Background as Background
 import Style.Shadow as Shadow
 import Element
     exposing
-        ( textLayout
+        ( Element
+        , textLayout
         , layout
         , row
         , column
@@ -25,9 +26,15 @@ import Element
         , text
         , underline
         , link
+        , button
         , el
         , paragraph
         , image
+        , h1
+        , h2
+        , h3
+        , h4
+        , wrappedRow
         )
 import Element.Attributes
     exposing
@@ -337,9 +344,9 @@ actionCall =
     column ActionCall
         [ width fill, center, spacing 40, paddingBottom 60 ]
         [ contestBanner
-        , Element.h2 ShadowedWhite [] (text "Writes code, right from your office.")
-        , Element.h3 ActionList [] (text "Get products, cooperation, and passion, all for one salary.")
-        , Element.paragraph ActionList
+        , h2 ShadowedWhite [] (text "Writes code, right from your office.")
+        , h3 ActionList [] (text "Get products, cooperation, and passion, all for one salary.")
+        , paragraph ActionList
             []
             [ el NoStyle [ padding 6 ] (text "Already have engineers?")
             , link mailto <| (underline "Great, I work better in teams.")
@@ -351,10 +358,10 @@ asSeenIn : Element.Element Styles Cmd Msg
 asSeenIn =
     column AsSeenIn
         [ spacing 20, center, paddingTop 25, paddingBottom 25 ]
-        [ Element.h4 NoStyle
+        [ h4 NoStyle
             []
             (text "As seen in...")
-        , Element.wrappedRow
+        , wrappedRow
             NoStyle
             [ width fill, spacing 40 ]
             (List.map
@@ -368,18 +375,18 @@ asSeenIn =
         ]
 
 
-asSeenInLogo : ( String, String ) -> Element.Element Styles Cmd Msg
+asSeenInLogo : ( String, String ) -> Element Styles Cmd Msg
 asSeenInLogo ( src, company ) =
     image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Logo" }
 
 
-about : Element.Element Styles Cmd Msg
+about : Element Styles Cmd Msg
 about =
     row About
         [ width fill, center, padding 30 ]
         [ column NoStyle
             [ maxWidth (px 780), width fill ]
-            [ Element.h2 ShadowedWhite [ padding 20 ] (text "About me")
+            [ h2 ShadowedWhite [ padding 20 ] (text "About me")
             , textLayout ShadowedDark
                 [ padding 20 ]
                 [ paragraph NoStyle
@@ -439,7 +446,7 @@ about =
         ]
 
 
-challenge : Model -> Element.Element Styles Cmd Msg
+challenge : Model -> Element Styles Cmd Msg
 challenge model =
     column Challenge
         [ width fill, maxWidth (px 780), center, padding 30, spacing 20 ]
@@ -509,7 +516,7 @@ challenge model =
         ]
 
 
-modeButton : ChallengeMode -> Element.Element Styles Cmd Msg
+modeButton : ChallengeMode -> Element Styles Cmd Msg
 modeButton mode =
     let
         buttonStyle =
@@ -538,14 +545,14 @@ modeButton mode =
                 ValueCharFrequency ->
                     "Value Frequency"
     in
-        Element.button buttonStyle
+        button buttonStyle
             [ width fill
             , Events.onClick onClick
             ]
             (text label)
 
 
-solution : Model -> Element.Element Styles Cmd Msg
+solution : Model -> Element Styles Cmd Msg
 solution model =
     let
         challengeTextDict =
@@ -584,15 +591,15 @@ solution model =
             charCounts
                 |> List.map (\( char, count ) -> ( char, count, Set.member char usedChars ))
     in
-        Element.column NoStyle
+        column NoStyle
             [ width fill, spacing 20 ]
             [ solutionChars charCountsUsed
             , column NoStyle
                 [ verticalSpread ]
-                [ (text "Removed Length")
-                , (text (toString solutionCost))
-                , (text "After Removal")
-                , (paragraph ChallengeInput
+                [ text "Removed Length"
+                , text (toString solutionCost)
+                , text "After Removal"
+                , paragraph ChallengeInput
                     [ height (px 300), padding 10 ]
                     [ text <|
                         String.filter
@@ -602,14 +609,19 @@ solution model =
                             )
                             model.challengeText
                     ]
-                  )
+                , el ActionList
+                    [ padding 20, center ]
+                    (link
+                        mailto
+                        (underline "Want to discuss my solution?")
+                    )
                 ]
             ]
 
 
-solutionChars : List ( Char, Int, Bool ) -> Element.Element Styles Cmd Msg
+solutionChars : List ( Char, Int, Bool ) -> Element Styles Cmd Msg
 solutionChars counts =
-    Element.wrappedRow NoStyle
+    wrappedRow NoStyle
         [ spacing 5, spread ]
         (List.map
             solutionCharBox
@@ -617,7 +629,7 @@ solutionChars counts =
         )
 
 
-solutionCharBox : ( Char, Int, Bool ) -> Element.Element Styles Cmd Msg
+solutionCharBox : ( Char, Int, Bool ) -> Element Styles Cmd Msg
 solutionCharBox ( char, count, used ) =
     column
         (if used then
