@@ -447,7 +447,7 @@ about =
                     [ text "After graduation I leveraged my systems knowledge as a core engineer at an autonomous vehicle startup."
                     , text " While there I used "
                     , el PurpleUnderline [] (text "Unix/POSIX")
-                    , text " to make efficient and reliable automotive sensor drivers and log files."
+                    , text " to make efficient and reliable automotive sensor drivers, as well as a data capture platform."
                     , text " I also used  "
                     , el PurpleUnderline [] (text "SQLite")
                     , text " to manage the vehicle's distributed configuration."
