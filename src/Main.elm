@@ -88,24 +88,15 @@ update msg model =
             ( { model | challengeText = challengeText }, Cmd.none )
 
         NewChallengeLimit limitString ->
-            updateChallengeLength limitString model
-
-
-updateChallengeLength : String -> Model -> ( Model, Cmd Msg )
-updateChallengeLength limitString model =
-    case String.toInt limitString of
-        Ok challengeLimit ->
-            let
-                newLimit =
-                    if challengeLimit > 0 then
-                        challengeLimit
-                    else
-                        0
-            in
-                ( { model | challengeLimit = challengeLimit }, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
+            ( { model
+                | challengeLimit =
+                    limitString
+                        |> String.filter (\c -> c /= '-')
+                        |> String.toInt
+                        |> Result.withDefault initChallengeLimit
+              }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg
@@ -425,12 +416,12 @@ challenge model =
                 { onChange = NewChallengeLimit
                 , value = toString initChallengeLimit
                 , label = Input.labelAbove (text "Minimum Length")
-                , options = []
+                , options = [ Input.allowSpellcheck ]
                 }
             , column NoStyle
                 [ verticalSpread ]
-                [ (text "Extra length")
-                , (text (toString (String.length model.challengeText - model.challengeLimit)))
+                [ (text "Current Length")
+                , (text <| toString <| String.length model.challengeText)
                 ]
             ]
         , Input.multiline ChallengeInput
