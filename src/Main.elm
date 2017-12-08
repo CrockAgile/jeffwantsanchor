@@ -493,27 +493,6 @@ challenge model =
                     }
                 ]
             }
-
-        -- row NoStyle
-        -- [ width fill, spread, spacing 10 ]
-        -- [ Input.text ChallengeInputLimit
-        --     []
-        --     { onChange = NewChallengeLimit
-        --     , value = toString initChallengeLimit
-        --     , label = Input.hiddenLabel "Minimum Length"
-        --     , options = [ Input.allowSpellcheck ]
-        --     }
-        -- , column NoStyle
-        --     [ width fill, verticalSpread ]
-        --     [ text "Mode"
-        --     , modeButton model.challengeMode
-        --     ]
-        -- , column NoStyle
-        --     [ width fill, verticalSpread ]
-        --     [ text "Current Length"
-        --     , text <| toString <| String.length model.challengeText
-        --     ]
-        -- ]
         , Input.multiline ChallengeInput
             [ height (px 300), padding 10 ]
             { onChange = NewChallengeText
