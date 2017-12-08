@@ -396,18 +396,30 @@ asSeenIn =
             [ width fill, spacing 40 ]
             (List.map
                 asSeenInLogo
-                [ ( "polysync.png", "PolySync" )
-                , ( "souperseconds.png", "Souper Seconds" )
-                , ( "clearwater.png", "Clearwater Analytics" )
-                , ( "camporkila.jpg", "Camp Orkila" )
+                [ ( "polysync.png"
+                  , "PolySync"
+                  , "https://polysync.io/"
+                  )
+                , ( "souperseconds.png"
+                  , "Souper Seconds"
+                  , "http://www.souperseconds.com/"
+                  )
+                , ( "clearwater.png"
+                  , "Clearwater Analytics"
+                  , "https://www.clearwater-analytics.com/"
+                  )
+                , ( "camporkila.jpg"
+                  , "Camp Orkila"
+                  , "https://www.seattleymca.org/camps/orkila"
+                  )
                 ]
             )
         ]
 
 
-asSeenInLogo : ( String, String ) -> Element Styles Cmd Msg
-asSeenInLogo ( src, company ) =
-    image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Logo" }
+asSeenInLogo : ( String, String, String ) -> Element Styles Cmd Msg
+asSeenInLogo ( src, company, url ) =
+    link url <| image NoStyle [ height (px 100) ] { src = src, caption = company ++ " Logo" }
 
 
 about : Element Styles Cmd Msg

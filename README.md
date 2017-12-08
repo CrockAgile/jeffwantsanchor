@@ -21,3 +21,11 @@ Job application for [Anchor.fm](anchor) inspired by their aesthetic
 `$ elm-reactor`
 
 [anchor]: https://anchor.fm
+
+### Build
+
+`$ elm-make src/Main.elm --output public/main.js`
+
+### Test
+
+`$ elm test`
