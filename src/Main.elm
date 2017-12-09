@@ -509,10 +509,10 @@ challenge model =
         , paragraph NoStyle
             []
             [ text "Realistically this should be clarified with the product owner,"
-            , text " but for fun I solved via a "
+            , text " but for fun I solved both cases via the "
             , link "https://en.wikipedia.org/wiki/Knapsack_problem" <|
-                text "Knapsack problem"
-            , text " solution and added a button for toggling."
+                underline "Knapsack problem"
+            , text ". The button below toggles between removing sets or characters."
             ]
         , grid NoStyle
             [ width fill, spacing 10, paddingTop 30 ]
