@@ -72,8 +72,8 @@ main =
 
 
 type ChallengeMode
-    = ValueCharOne
-    | ValueCharFrequency
+    = RemoveSets
+    | RemoveChars
 
 
 type alias Model =
@@ -97,7 +97,7 @@ init : ( Model, Cmd msg )
 init =
     ( { challengeText = initChallengeText
       , challengeLimit = initChallengeLimit
-      , challengeMode = ValueCharFrequency
+      , challengeMode = RemoveChars
       }
     , Cmd.none
     )
@@ -157,8 +157,8 @@ type Styles
     | ChallengeInputLimit
     | SolutionCharBox
     | SolutionCharBoxUsed
-    | ValueCharOneButton
-    | ValueCharFrequencyButton
+    | RemoveSetsButton
+    | RemoveCharsButton
 
 
 purple : Color.Color
@@ -256,6 +256,7 @@ stylesheet =
             ]
         , style ChallengeInput
             [ Font.size (fontScale 1)
+            , Font.typeface (fontStack Mono)
             , Color.border purple
             , Border.all 5
             , Style.focus [ Color.border teal ]
@@ -270,14 +271,14 @@ stylesheet =
             , Border.all 2
             , Font.typeface (fontStack Mono)
             ]
-        , style ValueCharOneButton
+        , style RemoveSetsButton
             [ Color.border black
             , Color.text teal
             , Border.all 2
             , Font.size (fontScale 1)
             , Font.typeface (fontStack Mono)
             ]
-        , style ValueCharFrequencyButton
+        , style RemoveCharsButton
             [ Color.border black
             , Color.text purple
             , Border.all 2
@@ -493,8 +494,28 @@ challenge model =
     column Challenge
         [ width fill, maxWidth (px 780), center, padding 30, spacing 20 ]
         [ h2 ShadowedPurple [ padding 20, id "challenge" ] (text "Challenge")
+        , paragraph NoStyle
+            []
+            [ text "The challenge description says to remove the 'largest unique "
+            , text " set of characters', but I could interpret 'largest' two ways:"
+            ]
+        , paragraph NoStyle
+            []
+            [ text "1. Largest means greatest number of character sets removed" ]
+        , underline "or"
+        , paragraph NoStyle
+            []
+            [ text "2. Largest means greatest number of characters removed" ]
+        , paragraph NoStyle
+            []
+            [ text "Realistically this should be clarified with the product owner,"
+            , text " but for fun I solved via a "
+            , link "https://en.wikipedia.org/wiki/Knapsack_problem" <|
+                text "Knapsack problem"
+            , text " solution and added a button for toggling."
+            ]
         , grid NoStyle
-            [ width fill, spacing 10 ]
+            [ width fill, spacing 10, paddingTop 30 ]
             { columns = [ fill, fill, fill ]
             , rows = [ fill, fill ]
             , cells =
@@ -564,29 +585,29 @@ modeButton mode =
     let
         buttonStyle =
             case mode of
-                ValueCharOne ->
-                    ValueCharOneButton
+                RemoveSets ->
+                    RemoveSetsButton
 
-                ValueCharFrequency ->
-                    ValueCharFrequencyButton
+                RemoveChars ->
+                    RemoveCharsButton
 
         onClick =
             NewChallengeMode
                 (case mode of
-                    ValueCharOne ->
-                        ValueCharFrequency
+                    RemoveSets ->
+                        RemoveChars
 
-                    ValueCharFrequency ->
-                        ValueCharOne
+                    RemoveChars ->
+                        RemoveSets
                 )
 
         label =
             case mode of
-                ValueCharOne ->
-                    "Value One"
+                RemoveSets ->
+                    "Remove Sets"
 
-                ValueCharFrequency ->
-                    "Value Frequency"
+                RemoveChars ->
+                    "Remove Chars"
     in
         button buttonStyle
             [ width fill
@@ -611,10 +632,10 @@ solution model =
 
         itemValue =
             case model.challengeMode of
-                ValueCharOne ->
+                RemoveSets ->
                     always 1
 
-                ValueCharFrequency ->
+                RemoveChars ->
                     Tuple.second
 
         solution =
@@ -642,16 +663,19 @@ solution model =
                 [ text "Removed Length"
                 , text (toString solutionCost)
                 , text "After Removal"
-                , paragraph ChallengeInput
+                , Input.multiline ChallengeInput
                     [ height (px 300), padding 10 ]
-                    [ text <|
+                    { onChange = NewChallengeText
+                    , value =
                         String.filter
                             (\char ->
                                 not <|
                                     Set.member char usedChars
                             )
                             model.challengeText
-                    ]
+                    , label = Input.hiddenLabel "Challenge Output"
+                    , options = [ Input.disabled ]
+                    }
                 , el ShadowedPurple
                     [ padding 20, center ]
                     (link
