@@ -157,8 +157,7 @@ type Styles
     | ChallengeInputLimit
     | SolutionCharBox
     | SolutionCharBoxUsed
-    | RemoveSetsButton
-    | RemoveCharsButton
+    | RemoveButton
 
 
 purple : Color.Color
@@ -271,14 +270,7 @@ stylesheet =
             , Border.all 2
             , Font.typeface (fontStack Mono)
             ]
-        , style RemoveSetsButton
-            [ Color.border black
-            , Color.text teal
-            , Border.all 2
-            , Font.size (fontScale 1)
-            , Font.typeface (fontStack Mono)
-            ]
-        , style RemoveCharsButton
+        , style RemoveButton
             [ Color.border black
             , Color.text purple
             , Border.all 2
@@ -309,7 +301,7 @@ fontStack stack =
             List.map Font.font [ "Garamond", "serif" ]
 
         Mono ->
-            List.map Font.font [ "Inconsolata", "monospace" ]
+            List.map Font.font [ "Lucida Console", "Monaco", "monospace" ]
 
 
 email : String
@@ -508,7 +500,7 @@ challenge model =
             [ text "2. Largest means greatest number of characters removed" ]
         , paragraph NoStyle
             []
-            [ text "Realistically this should be clarified with the product owner,"
+            [ text "In a real project, this should be clarified,"
             , text " but for fun I solved both cases via the "
             , link "https://en.wikipedia.org/wiki/Knapsack_problem" <|
                 underline "Knapsack problem"
@@ -583,14 +575,6 @@ challenge model =
 modeButton : ChallengeMode -> Element Styles Cmd Msg
 modeButton mode =
     let
-        buttonStyle =
-            case mode of
-                RemoveSets ->
-                    RemoveSetsButton
-
-                RemoveChars ->
-                    RemoveCharsButton
-
         onClick =
             NewChallengeMode
                 (case mode of
@@ -609,7 +593,7 @@ modeButton mode =
                 RemoveChars ->
                     "Remove Chars"
     in
-        button buttonStyle
+        button RemoveButton
             [ width fill
             , Events.onClick onClick
             ]
