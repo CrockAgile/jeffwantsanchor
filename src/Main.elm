@@ -41,6 +41,7 @@ import Element
 import Element.Attributes
     exposing
         ( spacing
+        , spacingXY
         , padding
         , paddingBottom
         , paddingTop
@@ -332,9 +333,8 @@ header =
     Element.header Header
         []
         (row NoStyle
-            [ center, verticalCenter, width fill, height (px 85), spacing 20 ]
-            [ Element.h1 Title [] (text "Jeff Wants Anchor")
-            , spacer 7
+            [ center, verticalCenter, width fill, height (px 85) ]
+            [ Element.h1 Title [ paddingRight 150 ] (text "Jeff Wants Anchor")
             , navigation Nav
                 [ spacing 30 ]
                 { name = "Main Navigation"
@@ -365,7 +365,7 @@ contestBanner =
 actionCall : Element.Element Styles Cmd Msg
 actionCall =
     column ActionCall
-        [ width fill, center, spacing 40, paddingBottom 60 ]
+        [ width fill, center, spacingXY 0 40, paddingBottom 60 ]
         [ contestBanner
         , h2 ShadowedWhite [] (text "Writes code, right from your office.")
         , h3 ActionList [] (text "Get products, cooperation, and passion, all for one salary.")
